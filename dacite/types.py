@@ -1,5 +1,5 @@
 from dataclasses import InitVar
-from typing import Type, Any, Optional, Union, Collection, TypeVar, Dict, Callable, Mapping, List, Tuple
+from typing import Type, Any, Optional, Union, Collection, TypeVar, Dict, Callable, Mapping, List, Tuple, Literal
 
 T = TypeVar("T", bound=Any)
 
@@ -38,10 +38,7 @@ def transform_value(
 
 
 def extract_origin_collection(collection: Type) -> Type:
-    try:
-        return collection.__extra__
-    except AttributeError:
-        return collection.__origin__
+    return getattr(collection, "__extra__", collection.__origin__)
 
 
 def is_optional(type_: Type) -> bool:
@@ -55,21 +52,12 @@ def extract_optional(optional: Type[Optional[T]]) -> T:
     raise ValueError("can not find not-none value")
 
 
-def is_generic(type_: Type) -> bool:
-    return hasattr(type_, "__origin__")
-
-
 def is_union(type_: Type) -> bool:
-    return is_generic(type_) and type_.__origin__ == Union
+    return getattr(type_, "__origin__", None) is Union
 
 
 def is_literal(type_: Type) -> bool:
-    try:
-        from typing import Literal  # type: ignore
-
-        return is_generic(type_) and type_.__origin__ == Literal
-    except ImportError:
-        return False
+    return getattr(type_, "__origin__", None) is Literal
 
 
 def is_new_type(type_: Type) -> bool:
@@ -138,7 +126,7 @@ def is_instance(value: Any, type_: Type) -> bool:
 
 
 def is_generic_collection(type_: Type) -> bool:
-    if not is_generic(type_):
+    if not hasattr(type_, "__origin__"):
         return False
     origin = extract_origin_collection(type_)
     try:

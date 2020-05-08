@@ -1,10 +1,8 @@
-import copy
 from dataclasses import is_dataclass
 from itertools import zip_longest
-from typing import TypeVar, Type, Optional, get_type_hints, Mapping, Any
+from typing import TypeVar, Type, Optional, get_type_hints, Mapping, Any, Dict
 
 from dacite.config import Config
-from dacite.data import Data
 from dacite.dataclasses import get_default_value_for_field, create_instance, DefaultValueNotFoundError, get_fields
 from dacite.exceptions import (
     ForwardReferenceError,
@@ -41,8 +39,8 @@ def from_dict(data_class: Type[T], data: Mapping[str, Any], config: Optional[Con
     """
     if any(("-" in k for k in data.keys())):
         data = {k.replace("-", "_"): v for k, v in data.items()}
-    init_values: Data = {}
-    post_init_values: Data = {}
+    init_values: Dict[str, Any] = {}
+    post_init_values: Dict[str, Any] = {}
     config = config or Config()
     try:
         data_class_hints = get_type_hints(data_class, globalns=config.forward_references)
@@ -58,8 +56,7 @@ def from_dict(data_class: Type[T], data: Mapping[str, Any], config: Optional[Con
         if extra_fields:
             raise UnexpectedDataError(keys=extra_fields)
     for field in data_class_fields:
-        field = copy.copy(field)
-        field.type = data_class_hints[field.name]
+        field_type = data_class_hints[field.name]
         field_name_data = config.rename_map.get(field.name, field.name)
         if field_name_data in data or field.name in data:
             try:
@@ -67,14 +64,14 @@ def from_dict(data_class: Type[T], data: Mapping[str, Any], config: Optional[Con
                 if field_data is None:
                     field_data = data[field.name]
                 transformed_value = transform_value(
-                    type_hooks=config.type_hooks, cast=config.cast, target_type=field.type, value=field_data
+                    type_hooks=config.type_hooks, cast=config.cast, target_type=field_type, value=field_data
                 )
-                value = _build_value(type_=field.type, data=transformed_value, config=config)
+                value = _build_value(type_=field_type, data=transformed_value, config=config)
             except DaciteFieldError as error:
                 error.update_path(field.name)
                 raise
-            if config.check_types and not is_instance(value, field.type):
-                raise WrongTypeError(field_path=field.name, field_type=field.type, value=value)
+            if config.check_types and not is_instance(value, field_type):
+                raise WrongTypeError(field_path=field.name, field_type=field_type, value=value)
         else:
             try:
                 value = get_default_value_for_field(field)
@@ -97,7 +94,7 @@ def _build_value(type_: Type, data: Any, config: Config) -> Any:
         return _build_value_for_union(union=type_, data=data, config=config)
     elif is_generic_collection(type_) and is_instance(data, extract_origin_collection(type_)):
         return _build_value_for_collection(collection=type_, data=data, config=config)
-    elif is_dataclass(type_) and is_instance(data, Data):
+    elif is_dataclass(type_) and isinstance(data, Mapping):
         return from_dict(data_class=type_, data=data, config=config)
     return data
 
@@ -135,7 +132,7 @@ def _build_value_for_union(union: Type, data: Any, config: Config) -> Any:
 
 def _build_value_for_collection(collection: Type, data: Any, config: Config) -> Any:
     data_type = data.__class__
-    if is_instance(data, Mapping):
+    if isinstance(data, Mapping):
         item_type = extract_generic(collection, defaults=(Any, Any))[1]
         return data_type((key, _build_value(type_=item_type, data=value, config=config)) for key, value in data.items())
     elif is_instance(data, tuple):
