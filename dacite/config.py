@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from keyword import kwlist
-from typing import Dict, Any, Callable, Optional, Type, List
+from typing import Any, Callable, Dict, List, Optional, Type
 
 
 @dataclass

@@ -1,5 +1,18 @@
 from dataclasses import InitVar
-from typing import Type, Any, Optional, Union, Collection, TypeVar, Dict, Callable, Mapping, List, Tuple, Literal
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 T = TypeVar("T", bound=Any)
 

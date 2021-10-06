@@ -1,5 +1,5 @@
-from dataclasses import Field, MISSING, _FIELDS, _FIELD, _FIELD_INITVAR  # type: ignore
-from typing import Type, Any, TypeVar, List, Mapping
+from dataclasses import _FIELD, _FIELD_INITVAR, _FIELDS, MISSING, Field  # type: ignore
+from typing import Any, List, Mapping, Type, TypeVar
 
 from dacite.types import is_optional
 

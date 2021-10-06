@@ -3,12 +3,12 @@ from dacite.core import from_dict
 from dacite.exceptions import (
     DaciteError,
     DaciteFieldError,
-    WrongTypeError,
-    MissingValueError,
-    UnionMatchError,
-    StrictUnionMatchError,
     ForwardReferenceError,
+    MissingValueError,
+    StrictUnionMatchError,
     UnexpectedDataError,
+    UnionMatchError,
+    WrongTypeError,
 )
 
 __all__ = [
