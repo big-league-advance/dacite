@@ -39,6 +39,8 @@ def from_dict(data_class: Type[T], data: Mapping[str, Any], config: Optional[Con
     :param config: a configuration of the creation process
     :return: an instance of a data class
     """
+    if any(("-" in k for k in data.keys())):
+        data = {k.replace("-", "_"): v for k, v in data.items()}
     init_values: Data = {}
     post_init_values: Data = {}
     config = config or Config()
