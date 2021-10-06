@@ -1,4 +1,5 @@
 from dataclasses import is_dataclass
+from functools import lru_cache
 from itertools import zip_longest
 from typing import Any, Dict, Mapping, Optional, Type, TypeVar, get_type_hints
 
@@ -34,6 +35,14 @@ from dacite.types import (
 T = TypeVar("T")
 
 
+@lru_cache
+def _get_type_hints(obj: Any) -> Mapping[str, Any]:
+    try:
+        return get_type_hints(obj=obj)
+    except NameError as error:
+        raise ForwardReferenceError(str(error))
+
+
 def from_dict(data_class: Type[T], data: Mapping[str, Any], config: Optional[Config] = None) -> T:
     """Create a data class instance from a dictionary.
 
@@ -47,10 +56,10 @@ def from_dict(data_class: Type[T], data: Mapping[str, Any], config: Optional[Con
     init_values: Dict[str, Any] = {}
     post_init_values: Dict[str, Any] = {}
     config = config or Config()
-    try:
+    if config.forward_references is None:
+        data_class_hints = _get_type_hints(data_class)
+    else:
         data_class_hints = get_type_hints(data_class, globalns=config.forward_references)
-    except NameError as error:
-        raise ForwardReferenceError(str(error))
     data_class_fields = get_fields(data_class)
     if config.strict:
         extra_fields = (

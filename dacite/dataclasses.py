@@ -1,4 +1,5 @@
 from dataclasses import _FIELD, _FIELD_INITVAR, _FIELDS, MISSING, Field  # type: ignore
+from functools import lru_cache
 from typing import Any, List, Mapping, Type, TypeVar
 
 from dacite.types import is_optional
@@ -27,6 +28,7 @@ def create_instance(data_class: Type[T], init_values: Mapping[str, Any], post_in
     return instance
 
 
+@lru_cache
 def get_fields(data_class: Type[T]) -> List[Field]:
     fields = getattr(data_class, _FIELDS)
     return [f for f in fields.values() if f._field_type is _FIELD or f._field_type is _FIELD_INITVAR]
