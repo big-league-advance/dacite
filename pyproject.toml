@@ -1,5 +1,55 @@
+[build-system]
+requires = [
+    "setuptools>=61.2",
+    "setuptools_scm[toml]>=7.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dacite"
+description = "Simple creation of data classes from dictionaries."
+license = { text = "MIT" }
+authors = [
+    { name = "Konrad Hałas", email = "halas.konrad@gmail.com" },
+    { name = "BigLeagueAdvance", email = "info@bigleagueadvance.com" }
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = "~=3.9"
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=5",
+    "pytest-benchmark",
+    "pytest-cov",
+    "coveralls",
+    "black",
+    "mypy",
+    "pylint",
+    "pre-commit"
+]
+
 [tool.black]
-    line-length = 120
+line-length = 120
+
+[tool.isort]
+profile = "black"
 
 [tool.pytest.ini_options]
-    addopts = "--benchmark-autosave --benchmark-json=benchmark.json"
+addopts = "--benchmark-autosave --benchmark-json=benchmark.json"
+
+[tool.setuptools.packages.find]
+namespaces = false
+
+[tool.setuptools_scm]
+tag_regex = "^(?:[\\w-]+[-/])*(?P<version>[vV]?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"
