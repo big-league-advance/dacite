@@ -44,6 +44,8 @@ def from_dict(data_class: Type[T], data: Data, config: Optional[Config] = None) 
     :param config: a configuration of the creation process
     :return: an instance of a data class
     """
+    if any(("-" in k for k in data.keys())):
+        data = {k.replace("-", "_"): v for k, v in data.items()}
     init_values: MutableMapping[str, Any] = {}
     post_init_values: MutableMapping[str, Any] = {}
     config = config or Config()
