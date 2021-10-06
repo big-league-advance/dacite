@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from keyword import kwlist
 from typing import Dict, Any, Callable, Optional, Type, List
 
 
@@ -10,3 +11,4 @@ class Config:
     check_types: bool = True
     strict: bool = False
     strict_unions_match: bool = False
+    rename_map: Dict[str, str] = field(default_factory=lambda: {f"{k}_": k for k in kwlist})

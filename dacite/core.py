@@ -48,15 +48,22 @@ def from_dict(data_class: Type[T], data: Mapping[str, Any], config: Optional[Con
         raise ForwardReferenceError(str(error))
     data_class_fields = get_fields(data_class)
     if config.strict:
-        extra_fields = set(data.keys()) - {f.name for f in data_class_fields}
+        extra_fields = (
+            set(data.keys())
+            - {config.rename_map.get(f.name, f.name) for f in data_class_fields}
+            - {f.name for f in data_class_fields}
+        )
         if extra_fields:
             raise UnexpectedDataError(keys=extra_fields)
     for field in data_class_fields:
         field = copy.copy(field)
         field.type = data_class_hints[field.name]
-        if field.name in data:
+        field_name_data = config.rename_map.get(field.name, field.name)
+        if field_name_data in data or field.name in data:
             try:
-                field_data = data[field.name]
+                field_data = data.get(field_name_data)
+                if field_data is None:
+                    field_data = data[field.name]
                 transformed_value = transform_value(
                     type_hooks=config.type_hooks, cast=config.cast, target_type=field.type, value=field_data
                 )
