@@ -31,7 +31,7 @@ from dacite.types import (
 T = TypeVar("T")
 
 
-def from_dict(data_class: Type[T], data: Data, config: Optional[Config] = None) -> T:
+def from_dict(data_class: Type[T], data: Mapping[str, Any], config: Optional[Config] = None) -> T:
     """Create a data class instance from a dictionary.
 
     :param data_class: a data class type
