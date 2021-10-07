@@ -88,7 +88,7 @@ def from_dict(data_class: Type[T], data: Mapping[str, Any], config: Optional[Con
                 raise WrongTypeError(field_path=field.name, field_type=field_type, value=value)
         else:
             try:
-                value = get_default_value_for_field(field)
+                value = get_default_value_for_field(field=field, field_type=field_type)
             except DefaultValueNotFoundError:
                 if not field.init:
                     continue

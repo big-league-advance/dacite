@@ -1,6 +1,6 @@
 from dataclasses import _FIELD, _FIELD_INITVAR, _FIELDS, MISSING, Field  # type: ignore
 from functools import lru_cache
-from typing import Any, List, Mapping, Type, TypeVar
+from typing import Any, Mapping, Sequence, Type, TypeVar
 
 from dacite.types import is_optional
 
@@ -11,12 +11,12 @@ class DefaultValueNotFoundError(Exception):
     pass
 
 
-def get_default_value_for_field(field: Field) -> Any:
+def get_default_value_for_field(field: Field, field_type: Type) -> Any:
     if field.default != MISSING:
         return field.default
     elif field.default_factory != MISSING:  # type: ignore
         return field.default_factory()  # type: ignore
-    elif is_optional(field.type):
+    elif is_optional(field_type):
         return None
     raise DefaultValueNotFoundError()
 
@@ -29,6 +29,6 @@ def create_instance(data_class: Type[T], init_values: Mapping[str, Any], post_in
 
 
 @lru_cache
-def get_fields(data_class: Type[T]) -> List[Field]:
+def get_fields(data_class: Type[T]) -> Sequence[Field]:
     fields = getattr(data_class, _FIELDS)
     return [f for f in fields.values() if f._field_type is _FIELD or f._field_type is _FIELD_INITVAR]
